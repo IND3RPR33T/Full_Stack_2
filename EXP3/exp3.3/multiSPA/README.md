@@ -16,7 +16,8 @@ This is a React single-page application (SPA) that implements a multi-page exper
 
 ## Demo
 
-![Application Demo](image.png)
+<img width="1801" height="928" alt="Screenshot 2026-02-03 233929" src="https://github.com/user-attachments/assets/0fd67d1a-f2a3-4552-9b73-6964eb68650c" />
+
 
 ## Project Structure
 
