@@ -14,7 +14,8 @@ This is a basic React single-page application (SPA) demonstrating React Router i
 
 ## Demo
 
-![Application Demo](image.png)
+<img width="1919" height="929" alt="Screenshot 2026-02-03 233227" src="https://github.com/user-attachments/assets/827f1bc1-9821-4bf6-81b7-9e0969fed8cd" />
+
 
 ## Project Structure
 
