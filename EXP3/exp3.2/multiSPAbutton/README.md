@@ -16,7 +16,8 @@ This is a React single-page application (SPA) that uses React Router to create a
 
 ## Demo
 
-<img width="1895" height="836" alt="Screenshot 2026-02-03 233603" src="https://github.com/user-attachments/assets/f832f4e7-a987-4270-924c-e5cfded234dd" />
+<img width="1801" height="928" alt="Screenshot 2026-02-03 233929" src="https://github.com/user-attachments/assets/0a07a287-3e88-45eb-b29d-c5737c345703" />
+
 
 
 
