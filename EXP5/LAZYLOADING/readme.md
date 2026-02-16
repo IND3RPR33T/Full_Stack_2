@@ -1,4 +1,5 @@
-<img width="1916" height="930" alt="Screenshot 2026-02-16 102042" src="https://github.com/user-attachments/assets/69cef208-cc73-4d5f-b51c-dd701534536e" />
+<img width="1917" height="931" alt="image" src="https://github.com/user-attachments/assets/5a437538-6d11-4ff4-9d1a-05df6066fe9a" />
+
 # React Lazy Loading SPA
 
 This project is a Single Page Application (SPA) built with React and Vite, demonstrating the power of Code Splitting and Lazy Loading to optimize performance.
