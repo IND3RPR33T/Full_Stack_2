@@ -1,5 +1,6 @@
-<img width="1915" height="930" alt="Screenshot 2026-02-16 104828" src="https://github.com/user-attachments/assets/3cfab656-8b98-4648-a203-b44bca329199" />
-<img width="1916" height="930" alt="Screenshot 2026-02-16 102042" src="https://github.com/user-attachments/assets/2c45bbf3-47ab-4791-801d-11abad009213" />
+<img width="1919" height="930" alt="image" src="https://github.com/user-attachments/assets/fa39ed54-2ab4-45ab-8138-8ded609421df" />
+<img width="1918" height="926" alt="image" src="https://github.com/user-attachments/assets/6efe347e-7008-43cd-ac84-de0b5dc0933c" />
+
 
 # React Lazy Loading SPA
 
