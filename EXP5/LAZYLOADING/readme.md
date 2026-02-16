@@ -9,6 +9,8 @@ This project is a Single Page Application (SPA) built with React and Vite, demon
 -   **Suspense Fallback**: A custom loading UI is displayed while the lazy-loaded component is being fetched.
 -   **Responsive Design**: basic structure ready for expansion.
 
+SCREENSHOTS
+<img width="1916" height="930" alt="Screenshot 2026-02-16 102042" src="https://github.com/user-attachments/assets/69cef208-cc73-4d5f-b51c-dd701534536e" />
 ## 🛠️ Technologies Used
 
 -   [React](https://react.dev/) (v19)
@@ -64,5 +66,4 @@ It is then rendered within a `Suspense` boundary:
   </Routes>
 </Suspense>
 
-SCREENSHOTS
-<img width="1916" height="930" alt="Screenshot 2026-02-16 102042" src="https://github.com/user-attachments/assets/69cef208-cc73-4d5f-b51c-dd701534536e" />
+
