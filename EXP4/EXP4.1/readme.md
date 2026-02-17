@@ -1,16 +1,68 @@
-# React + Vite
+<img width="1902" height="932" alt="image" src="https://github.com/user-attachments/assets/180cc2b7-b36a-4b8b-aa7f-edd02c6dd193" />
+<img width="1895" height="923" alt="image" src="https://github.com/user-attachments/assets/c125c6b2-3b36-4dfa-9484-79d5aac95b6f" />
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+# Context Lab
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A React application demonstrating the power of the React Context API for global state management. This project serves as a practical lab for understanding how to avoid prop drilling by using Context to manage shared state like themes and user profiles.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Global State Management**: Utilizes `GlobalContext` to share state across the component tree without prop drilling.
+- **Theme Toggling**: Switch between Light and Dark modes dynamically. The theme state is persisted and applied globally.
+- **User Profile**: Manages and displays user profile information using the global context.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **React**: UI library.
+- **Vite**: Build tool and development server.
+- **Context API**: Native React state management.
+
+## Getting Started
+
+Follow these instructions to set up and run the project locally.
+
+### Prerequisites
+
+- Node.js (v14 or higher recommended)
+- npm (comes with Node.js)
+
+### Installation
+
+1.  Navigate to the project directory:
+    ```bash
+    cd EXP4/EXP4.1
+    ```
+
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+### Running the App
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open your browser and visit the URL shown in the terminal (usually `http://localhost:5173`).
+
+## Project Structure
+
+```
+src/
+├── context/
+│   └── GlobalContext.jsx  # Context definition and provider
+├── components/            # (If applicable)
+├── App.jsx                # Main component consuming context
+├── main.jsx               # Entry point, wraps App with GlobalProvider
+├── Theme.jsx              # Component to toggle themes
+├── Profile.jsx            # Component to display user info
+└── App.css                # Application styles
+```
+
+## Learn More
+
+To learn more about the React Context API, check out the [official documentation](https://react.dev/learn/passing-data-deeply-with-context).
