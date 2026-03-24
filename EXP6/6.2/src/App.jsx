@@ -7,8 +7,35 @@ function App() {
     password: ""
   });
 
+  const [emailErrors, setEmailErrors] = useState([]);
   const [passwordErrors, setPasswordErrors] = useState([]);
   const [loginSuccess, setLoginSuccess] = useState(false);
+
+  const validateEmail = (email) => {
+    const errors = [];
+
+    // Rule 1: Exactly one '@' symbol
+    const atCount = (email.match(/@/g) || []).length;
+    if (atCount !== 1) {
+      errors.push("Email must contain exactly one '@' symbol");
+    }
+
+    if (atCount === 1) {
+      const [localPart, domainPart] = email.split("@");
+
+      // Rule 2: No special characters before '@' — only letters and digits allowed
+      if (!/^[a-zA-Z0-9]+$/.test(localPart)) {
+        errors.push("No special characters allowed before '@' (only letters & digits)");
+      }
+
+      // Rule 3: Domain must be in format 'word.com' — exactly one dot before 'com', no extra dots
+      if (!domainPart || !/^[a-zA-Z0-9]+\.com$/.test(domainPart)) {
+        errors.push("Domain must be in 'name.com' format (e.g. gmail.com) — only one dot allowed");
+      }
+    }
+
+    return errors;
+  };
 
   const validatePassword = (password) => {
     const errors = [];
@@ -40,6 +67,11 @@ function App() {
       [name]: value
     });
 
+    // Live email validation
+    if (name === "email") {
+      setEmailErrors(validateEmail(value));
+    }
+
     // Live password validation
     if (name === "password") {
       setPasswordErrors(validatePassword(value));
@@ -49,11 +81,9 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const emailRegex =
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|in|[a-z]{2,})$/;
-
-    if (!emailRegex.test(formData.email)) {
-      alert("Invalid Email format!");
+    const currentEmailErrors = validateEmail(formData.email);
+    if (currentEmailErrors.length > 0) {
+      setEmailErrors(currentEmailErrors);
       return;
     }
 
@@ -73,8 +103,8 @@ function App() {
             <h2>✅ Login Successful!</h2>
             <p>Welcome back! Your login was successful.</p>
             <p className="email-display">Email: {formData.email}</p>
-            <button 
-              className="login-btn" 
+            <button
+              className="login-btn"
               onClick={() => {
                 setLoginSuccess(false);
                 setFormData({ email: "", password: "" });
@@ -98,13 +128,22 @@ function App() {
           <div className="input-group">
             <label>Email Address</label>
             <input
-              type="email"
+              type="text"
               name="email"
               placeholder="example@company.com"
               value={formData.email}
               onChange={handleChange}
               required
             />
+
+            {/* Live Email Rules */}
+            <div className="password-rules">
+              {emailErrors.map((error, index) => (
+                <p key={index} className="error-text">
+                  ❌ {error}
+                </p>
+              ))}
+            </div>
           </div>
 
           <div className="input-group">
