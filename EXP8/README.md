@@ -79,7 +79,7 @@ The app runs on:
 
 <img width="1902" height="954" alt="image" src="https://github.com/user-attachments/assets/372f7979-6428-45f3-a78f-c74649d55c32" />
 
-![Screenshot 2](./try/image5.png)
-![Screenshot 2](./try/image6.png)
+<img width="910" height="605" alt="image" src="https://github.com/user-attachments/assets/3e3b4fe6-055f-4126-9884-f9a116058590" />
+
 ![Screenshot 2](./try/image7.png)
 ![Screenshot 2](./try/image8.png)
