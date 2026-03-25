@@ -77,7 +77,8 @@ The app runs on:
 
 ### Screenshot 4-8 Crud Methods (image4)
 
-![Screenshot 2](./try/image4.png)
+<img width="1902" height="954" alt="image" src="https://github.com/user-attachments/assets/372f7979-6428-45f3-a78f-c74649d55c32" />
+
 ![Screenshot 2](./try/image5.png)
 ![Screenshot 2](./try/image6.png)
 ![Screenshot 2](./try/image7.png)
