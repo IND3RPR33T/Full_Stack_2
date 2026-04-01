@@ -20,6 +20,8 @@ This experiment demonstrates how to implement a **Stateless Authentication Syste
 *   **Build Tool**: Maven
 
 ---
+<img width="1594" height="991" alt="Screenshot 2026-04-01 100659" src="https://github.com/user-attachments/assets/03604af3-48af-4f99-badd-3a748234e552" />
+<img width="1288" height="747" alt="Screenshot 2026-04-01 100712" src="https://github.com/user-attachments/assets/743020b3-ae78-4510-912d-ca8cca485ebc" />
 
 ## 📂 Quick Start
 1.  **Navigate**: `cd EXP9`
