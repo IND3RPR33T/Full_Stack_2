@@ -1,3 +1,6 @@
+<img width="1919" height="969" alt="image" src="https://github.com/user-attachments/assets/adc7a7b0-ebc1-4317-8353-5e299b498da1" />
+<img width="1919" height="972" alt="Screenshot 2026-04-20 151743" src="https://github.com/user-attachments/assets/8086c2b3-4497-4948-96dd-28efafe24b2e" />
+
 # NexusChat — WebSocket Application Documentation
 
 A full-stack, real-time two-way chat application built with **Spring Boot (WebSocket + STOMP)** on the backend and **React + Vite** on the frontend.
