@@ -3,8 +3,9 @@ package com.aml3A.Websocketdev;
 public class Message {
     private String sender;
     private String content;
-    private String type;      // "text" or "voice"
+    private String type;      // "text" or "voice" or "image" or "sticker"
     private String audioData; // base64-encoded audio (for voice messages)
+    private String fileData;  // base64-encoded image or sticker URL
 
     public Message() {}
 
@@ -25,4 +26,7 @@ public class Message {
 
     public String getAudioData() { return audioData; }
     public void setAudioData(String audioData) { this.audioData = audioData; }
+
+    public String getFileData() { return fileData; }
+    public void setFileData(String fileData) { this.fileData = fileData; }
 }

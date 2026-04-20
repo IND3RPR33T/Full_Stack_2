@@ -1,9 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client/dist/sockjs.min.js';
+import EmojiPicker from 'emoji-picker-react';
 import './App.css';
 
 const BACKEND_URL = 'http://localhost:8080/ws';
+
+// Reliable animated stickers (Google Noto Emoji)
+const STICKERS = [
+  'https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif',
+  'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.gif',
+  'https://fonts.gstatic.com/s/e/notoemoji/latest/1f929/512.gif',
+  'https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.gif',
+  'https://fonts.gstatic.com/s/e/notoemoji/latest/1f44b/512.gif',
+  'https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/512.gif',
+];
 
 // Convert a Blob to base64 string
 const blobToBase64 = (blob) =>
@@ -13,6 +24,38 @@ const blobToBase64 = (blob) =>
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
+
+// Compress image to ensure it easily fits within the WebSocket limits
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Compress to JPEG
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        resolve(compressedBase64);
+      };
+    };
+  });
+};
 
 function useRecorder() {
   const [recording, setRecording] = useState(false);
@@ -88,13 +131,9 @@ function VoicePlayer({ audioData, isOwn }) {
       />
       <button className="play-btn" onClick={toggle} title={playing ? 'Pause' : 'Play'}>
         {playing ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         )}
       </button>
       <div className="voice-track">
@@ -125,8 +164,12 @@ function App() {
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
+  
   const clientRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
   const { recording, seconds, start: startRec, stop: stopRec } = useRecorder();
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -142,6 +185,7 @@ function App() {
         setConnecting(false);
         client.subscribe('/topic/messages', (frame) => {
           const msg = JSON.parse(frame.body);
+          console.log('Received message:', msg); // Debug log
           const now = new Date();
           setMessages((prev) => [
             ...prev,
@@ -192,10 +236,36 @@ function App() {
     if (!input.trim() || !connected) return;
     publishMessage({ sender: username, content: input, type: 'text' });
     setInput('');
+    setShowEmojiPicker(false);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) handleSend(e);
+  };
+
+  const handleEmojiClick = (emojiData) => {
+    setInput((prev) => prev + emojiData.emoji);
+  };
+
+  const handleStickerSend = (stickerUrl) => {
+    publishMessage({ sender: username, content: '', type: 'sticker', fileData: stickerUrl });
+    setShowStickerPicker(false);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !connected) return;
+
+    try {
+      const base64Image = await compressImage(file);
+      publishMessage({ sender: username, content: '', type: 'image', fileData: base64Image });
+    } catch (err) {
+      console.error('Image compression failed', err);
+      alert('Failed to process image');
+    }
+    
+    // Reset input
+    e.target.value = '';
   };
 
   const handleMicClick = async () => {
@@ -205,21 +275,18 @@ function App() {
       const blob = await stopRec();
       if (!blob || !connected) return;
 
-      // Guard: empty blob means no mic audio was captured
       if (blob.size < 1000) {
         console.warn('Voice blob is empty or too small — no microphone audio captured.');
         alert('No audio was captured. Make sure your microphone is connected and allowed.');
         return;
       }
 
-      // Guard: base64 of ~1MB audio ≈ 1.33MB payload — warn if too large
       if (blob.size > 750_000) {
         alert('Recording is too long (max ~30 seconds). Please record a shorter message.');
         return;
       }
 
       const base64 = await blobToBase64(blob);
-      console.log(`Sending voice message: ${blob.size} bytes, type=${blob.type}`);
       publishMessage({ sender: username, content: '', type: 'voice', audioData: base64 });
     }
   };
@@ -245,8 +312,8 @@ function App() {
           <div className="feature-list">
             <div className="feature-item"><span>⚡</span><div><strong>Instant Delivery</strong><p>Messages delivered in milliseconds via WebSockets</p></div></div>
             <div className="feature-item"><span>🎙</span><div><strong>Voice Messages</strong><p>Record and send audio clips directly in the chat</p></div></div>
+            <div className="feature-item"><span>🖼️</span><div><strong>Rich Media</strong><p>Send images, emojis, and animated stickers instantly</p></div></div>
             <div className="feature-item"><span>👥</span><div><strong>Multi-User</strong><p>Unlimited users in the same room simultaneously</p></div></div>
-            <div className="feature-item"><span>🌐</span><div><strong>Spring Boot Powered</strong><p>STOMP over WebSocket protocol on the backend</p></div></div>
           </div>
           <div className="stack-badges">
             <span className="badge">React</span><span className="badge">Vite</span>
@@ -329,7 +396,7 @@ function App() {
           <div className="channel-welcome">
             <div className="welcome-icon">#</div>
             <h3>Welcome to #general</h3>
-            <p>Send text or tap the mic button to record a voice message.</p>
+            <p>Send text, voice notes, images, emojis, and stickers!</p>
           </div>
 
           {groupedMessages.map((msg) => {
@@ -337,6 +404,28 @@ function App() {
               <div key={msg.id} className="system-msg"><span>{msg.content}</span></div>
             );
             const isOwn = msg.sender === username;
+            
+            // Helper to render content based on type
+            const renderContent = () => {
+              if (msg.type === 'voice') {
+                return <VoicePlayer audioData={msg.audioData} isOwn={isOwn} />;
+              } else if (msg.type === 'image') {
+                return (
+                  <div className="msg-media-container">
+                    <img src={msg.fileData} alt="uploaded" className="msg-image" onError={(e) => console.error('Image load error', e)} />
+                  </div>
+                );
+              } else if (msg.type === 'sticker') {
+                return (
+                  <div className="msg-media-container">
+                    <img src={msg.fileData} alt="sticker" className="msg-sticker" onError={(e) => console.error('Sticker load error', e)} />
+                  </div>
+                );
+              } else {
+                return <div className={`msg-bubble ${isOwn ? 'own' : ''}`}>{msg.content}</div>;
+              }
+            };
+
             return (
               <div key={msg.id} className={`msg-row ${msg.grouped ? 'grouped' : ''}`}>
                 {!msg.grouped
@@ -350,10 +439,7 @@ function App() {
                       <span className="msg-time">{msg.timestamp}</span>
                     </div>
                   )}
-                  {msg.type === 'voice'
-                    ? <VoicePlayer audioData={msg.audioData} isOwn={isOwn} />
-                    : <div className={`msg-bubble ${isOwn ? 'own' : ''}`}>{msg.content}</div>
-                  }
+                  {renderContent()}
                 </div>
               </div>
             );
@@ -369,8 +455,74 @@ function App() {
               <span className="rec-hint">Click the mic again to send</span>
             </div>
           )}
+          
+          <div className="pickers-container">
+             {showEmojiPicker && (
+               <div className="emoji-picker-wrapper">
+                 <EmojiPicker onEmojiClick={handleEmojiClick} theme="dark" />
+               </div>
+             )}
+             
+             {showStickerPicker && (
+               <div className="sticker-picker-wrapper">
+                 <h4>Stickers</h4>
+                 <div className="sticker-grid">
+                   {STICKERS.map((sticker, idx) => (
+                     <img 
+                       key={idx} 
+                       src={sticker} 
+                       alt={`sticker ${idx}`} 
+                       onClick={() => handleStickerSend(sticker)}
+                     />
+                   ))}
+                 </div>
+               </div>
+             )}
+          </div>
+
           <form onSubmit={handleSend} className="input-form">
             <div className={`input-box ${!connected ? 'disabled' : ''}`}>
+              
+              {/* Image Upload Button */}
+              <input 
+                type="file" 
+                accept="image/*" 
+                style={{ display: 'none' }} 
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+              />
+              <button
+                type="button"
+                className="media-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={!connected || recording}
+                title="Upload Image"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              </button>
+
+              {/* Sticker Button */}
+              <button
+                type="button"
+                className={`media-btn ${showStickerPicker ? 'active' : ''}`}
+                onClick={() => { setShowStickerPicker(!showStickerPicker); setShowEmojiPicker(false); }}
+                disabled={!connected || recording}
+                title="Stickers"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              </button>
+
+              {/* Emoji Button */}
+              <button
+                type="button"
+                className={`media-btn ${showEmojiPicker ? 'active' : ''}`}
+                onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowStickerPicker(false); }}
+                disabled={!connected || recording}
+                title="Emojis"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+              </button>
+
               {/* Mic button */}
               <button
                 id="mic-btn"
@@ -381,13 +533,9 @@ function App() {
                 title={recording ? 'Stop & send voice message' : 'Start voice recording'}
               >
                 {recording ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  </svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/>
-                  </svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>
                 )}
               </button>
 
