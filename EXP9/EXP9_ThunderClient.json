@@ -1,0 +1,44 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "EXP9 - JWT Auth",
+  "dateExported": "2026-03-30T11:58:00.000Z",
+  "version": "1.1",
+  "folders": [],
+  "requests": [
+    {
+      "name": "1. Login (Get Token)",
+      "url": "http://localhost:8080/api/login",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2026-03-30T11:58:10.000Z",
+      "modified": "2026-03-30T11:58:10.000Z",
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "formencoded",
+        "formencoded": [
+          {
+            "name": "username",
+            "value": "admin"
+          },
+          {
+            "name": "password",
+            "value": "admin"
+          }
+        ]
+      },
+      "tests": []
+    },
+    {
+      "name": "2. Hello API",
+      "url": "http://localhost:8080/api/hello",
+      "method": "GET",
+      "sortNum": 20000,
+      "created": "2026-03-30T11:58:20.000Z",
+      "modified": "2026-03-30T11:58:20.000Z",
+      "headers": [],
+      "params": [],
+      "tests": []
+    }
+  ]
+}
